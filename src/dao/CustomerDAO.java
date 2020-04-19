@@ -1,5 +1,9 @@
 package dao;
 
+/**
+ * This class is used to performs various database operations by customers.
+ */
+
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
@@ -18,6 +22,7 @@ public class CustomerDAO {
 	List<String> gettruck=new ArrayList<String>();
 	Connection con;
 	
+	//Customer SignUp after validating from registration validation.
 	public void customerSignUp(Customer customer) throws Exception {
 		con=ConnectionManager.getConnection();
 		Statement s1=con.createStatement();
@@ -43,6 +48,7 @@ public class CustomerDAO {
 		}
 	}
 	
+	//Show all distinct types of trucks.
 	public List<String> getAllType() throws Exception {
 		con=ConnectionManager.getConnection();
 		Statement statement=con.createStatement();
@@ -53,6 +59,7 @@ public class CustomerDAO {
 		return gettruck;
 	}
 	
+	//Show all cities where services is available.
 	public List<String> getAllCities() throws Exception {
 		con=ConnectionManager.getConnection();
 		Statement statement=con.createStatement();
@@ -63,6 +70,7 @@ public class CustomerDAO {
 		return allcities;
 	}
 	
+	//Show all types of trucks whose availabilty status is available.
 	public List<String> getAvailableTruck() throws Exception {
 		con=ConnectionManager.getConnection();
 		Statement statement=con.createStatement();
@@ -73,6 +81,7 @@ public class CustomerDAO {
 		return truckavailable;
 	}
 	
+	//Show the fare of the route.
 	public long getFare(String source,String destination) throws Exception {
 		long fare=0;
 		con=ConnectionManager.getConnection();
@@ -92,6 +101,7 @@ public class CustomerDAO {
 		return fare;
 	}
 	
+	//Operation perform when the user confirm the booking.
 	public void yesRequest(String email,String source,String destination,String type,String bookingid) throws Exception {
 		con=ConnectionManager.getConnection();
 		PreparedStatement pscheck=con.prepareStatement("SELECT email,sourcer,destination,bookingid FROM requests WHERE email=? AND sourcer=? AND destination=? AND bookingid=?");
@@ -123,6 +133,7 @@ public class CustomerDAO {
 		}
 	}
 	
+	//Operation perform when the user confirm the successfully delivery.
 	public void deliverSuccessfully(String email,String trucknum,String bookingid) throws Exception {
 		con=ConnectionManager.getConnection();
 		Statement s1=con.createStatement();
@@ -179,6 +190,7 @@ public class CustomerDAO {
 //		con.close();
 //	}
 	
+	//Show only pending request.
 	public void seePendingRequest(String email) throws Exception{
 		int i=0;
 		con=ConnectionManager.getConnection();
@@ -191,6 +203,7 @@ public class CustomerDAO {
 		}
 	}
 	
+	//Show all requests pending as well as ongoing.
 	public void seeAllRequest(String email) throws Exception{
 		con=ConnectionManager.getConnection();
 		PreparedStatement statement1=con.prepareStatement("SELECT sourcer,destination,bookingid FROM requests WHERE email=? AND trucknum='NULL'");

@@ -1,5 +1,9 @@
 package dao;
 
+/**
+ * This class is used to performs various database operations by Admin.
+ */
+
 import java.sql.Connection;
 
 import java.sql.PreparedStatement;
@@ -15,14 +19,19 @@ import utility.ConnectionManager;
 public class AdminDAO {
 	List<String> name=new ArrayList<String>();
 	List<Truck> type=new ArrayList<Truck>();
-	Connection con,con1;
+	Connection con;
 	
+	//Admin SignUp function.
 	public void adminSignUp(Admin admin) throws Exception {
 		con=ConnectionManager.getConnection();
 		Statement s1=con.createStatement();
 		Statement s2=con.createStatement();
+		//check that email already exist or not.
 		ResultSet emailexist=s1.executeQuery("SELECT email from admindetail WHERE email='"+admin.getEmail()+"'");
+		
+		//check that username already exist or not.
 		ResultSet userexist=s2.executeQuery("SELECT username from admindetail WHERE username='"+admin.getUsername()+"'");
+		
 		if(emailexist.next()) {
 			System.out.println("--------------------Email already exists Please Login--------------------");
 		}
@@ -40,6 +49,7 @@ public class AdminDAO {
 		}
 	}
 	
+	//used to assign the truck which customer request for & assign driver.
 	public void updateRequests(String email,String sourcer,String destination,String trucknum,String drivername,String drivernum,String ownernum,String bookingid) throws Exception {
 		con=ConnectionManager.getConnection();
 		PreparedStatement st1=con.prepareStatement("SELECT email FROM requests WHERE email=?");
@@ -64,7 +74,7 @@ public class AdminDAO {
 			st.setString(8, destination);
 			st.execute();
 			updateTruckAvailability(trucknum, "NotAvailable");
-			updateLocation(trucknum, sourcer);
+			updateLocationOnRequest(trucknum, sourcer);
 			con.close();
 		}
 		else {
@@ -72,6 +82,7 @@ public class AdminDAO {
 		}
 	}
 	
+	//Stores new truck.
 	public void insertNewTruck(Truck truck) throws Exception {
 		con=ConnectionManager.getConnection();
 		PreparedStatement checktruck=con.prepareStatement("SELECT truckname FROM truck WHERE truckname=?");
@@ -96,6 +107,7 @@ public class AdminDAO {
 		}
 	}
 	
+	//Store new route.
 	public void insertNewRoute(String picklocation,String droplocation,int fare) throws Exception {
 		con=ConnectionManager.getConnection();
 		PreparedStatement checkroute=con.prepareStatement("SELECT picklocation,droplocation FROM fare WHERE picklocation=? AND droplocation=?");
@@ -118,6 +130,7 @@ public class AdminDAO {
 		}
 	}
 	
+	//Remove route.
 	public void deleteRoute(String picklocation,String droplocation) throws Exception {
 		con=ConnectionManager.getConnection();
 		PreparedStatement ps=con.prepareStatement("DELETE FROM fare WHERE picklocation=? AND droplocation=?");
@@ -128,6 +141,7 @@ public class AdminDAO {
 		System.out.println("Route from "+picklocation+" to "+droplocation+" deleted.");
 	}
 	
+	//Update fare of existing route.
 	public void updateFare(String picklocation,String droplocation,String fare) throws Exception {
 		con=ConnectionManager.getConnection();
 		PreparedStatement ps1=con.prepareStatement("SELECT picklocation,droplocation FROM fare WHERE picklocation=? AND droplocation=?");
@@ -149,21 +163,20 @@ public class AdminDAO {
 		}
 	}
 	
+	//Show all the trucks with their types & availabiity.
 	public void getTruckStatusWithType() throws Exception {
 		con=ConnectionManager.getConnection();
 		Statement s1=con.createStatement();
 		ResultSet rs=s1.executeQuery("SELECT truck.truckname,truck.type,truckstatus.availability,truckstatus.location FROM truck FULL OUTER JOIN truckstatus ON truck.truckname=truckstatus.truckname");
+		System.out.println("TRUCK-NUMBER                TYPE                  STATUS                  LOCATION");
+		System.out.println("----------------------------------------------------------------------------------");
 		while(rs.next()) {
-			if(rs.getString(4).equals("Available")) {
-				System.out.println("Truck number "+rs.getString(1)+" of type "+rs.getString(2)+" is "+rs.getString(3)+" at "+rs.getString(4));
-			}
-			else {
-				System.out.println("Truck number "+rs.getString(1)+" of type "+rs.getString(2)+" is "+rs.getString(3)+".");
-			}
+				System.out.println("  "+rs.getString(1)+"               "+rs.getString(2)+"               "+rs.getString(3)+"               "+rs.getString(4));
 		}
 		con.close();
 	}
 	
+	//Remove the truck.
 	public void deleteTruck(String trucknumber) throws Exception {
 		con=ConnectionManager.getConnection();
 		PreparedStatement checktruck=con.prepareStatement("SELECT truckname FROM truckstatus WHERE truckname=?");
@@ -185,6 +198,7 @@ public class AdminDAO {
 		}
 	}
 	
+	//Show all trucks registration number calling before removing the truck.
 	public void getTruck() throws Exception {
 		con=ConnectionManager.getConnection();
 		Statement statement=con.createStatement();
@@ -197,6 +211,7 @@ public class AdminDAO {
 		con.close();
 	}
 	
+	//Show all pending requests which are not updated yet.
 	public void seeRequests() throws Exception {
 		con=ConnectionManager.getConnection();
 		Statement st=con.createStatement();
@@ -207,6 +222,7 @@ public class AdminDAO {
 		con.close();
 	}
 	
+	//Set the truck availability status.
 	public void updateTruckAvailability(String trucknumber,String status) throws Exception{
 		con=ConnectionManager.getConnection();
 		PreparedStatement ps=con.prepareStatement("UPDATE truckstatus SET availability=? WHERE truckname=?");
@@ -217,6 +233,18 @@ public class AdminDAO {
 		System.out.println("("+trucknumber+") iS BOOKED.");
 	}
 	
+	//Update the truck location automatically on update request.
+		public void updateLocationOnRequest(String trucknumber, String location) throws Exception {
+			con=ConnectionManager.getConnection();
+			PreparedStatement ps2=con.prepareStatement("UPDATE truckstatus SET location=? WHERE truckname=?");
+			ps2.setString(1, location);
+			ps2.setString(2, trucknumber);
+			ps2.execute();
+			con.close();
+			System.out.println(trucknumber+" iS NOW LOCATED iN "+location);
+		}
+	
+	//Update the truck location Separately.
 	public void updateLocation(String trucknumber, String location) throws Exception {
 		con=ConnectionManager.getConnection();
 		PreparedStatement ps1=con.prepareStatement("SELECT trucknum FROM requests WHERE trucknum=? AND delivered='NO'");
@@ -232,7 +260,7 @@ public class AdminDAO {
 			ps2.setString(2, trucknumber);
 			ps2.execute();
 			con.close();
-			System.out.println(trucknumber+" iS LOCATED iN "+location);
+			System.out.println(trucknumber+" iS NOW LOCATED iN "+location);
 		}
 	}
 }

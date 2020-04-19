@@ -1,5 +1,9 @@
 package model;
 
+/**
+ * This class is used to stores Admin details.
+ */
+
 public class Admin {
 	private String email;
 	private String username;

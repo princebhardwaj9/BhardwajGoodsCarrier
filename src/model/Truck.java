@@ -1,5 +1,10 @@
 package model;
 
+/**
+ * This class is used to stores truck registration number and type of truck.
+ * Truck registration number is validate by TruckNameValidation class in business logic.
+ */
+
 public class Truck {
 	private String truckname;
 	private String type;

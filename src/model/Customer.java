@@ -1,5 +1,9 @@
 package model;
 
+/**
+ * This class is used to stores customer name, email, username, mobile number, password.
+ */
+
 public class Customer {
 	private String name;
 	private String email;

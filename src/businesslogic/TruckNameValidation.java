@@ -1,5 +1,9 @@
 package businesslogic;
 
+/**
+ * Confirms the valid truck registration number
+ */
+
 import java.util.regex.Pattern;
 
 public class TruckNameValidation {
